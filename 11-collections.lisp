@@ -129,4 +129,32 @@
 
 (reduce '+ #( 1 2 3 4 5 6 7 8))
 
+(make-hash-table)
+(make-hash-table :test 'equal) ; test can only be 'eq, 'eql, 'equal and 'equalp
 
+(defparameter *h* (make-hash-table))
+
+(gethash 'foo *h*)
+(setf (gethash 'foo *h*) 'quux)
+
+(gethash 'foo *h*) ; returns two values, the second whether the value was in the table
+
+;;; example for multiple value handling
+
+(defun show-value (key hash-table)
+  (multiple-value-bind (value present) (gethash key hash-table)
+    (if present
+	(format nil "Value ~a actually present." value)
+	(format nil "Value ~a because key not found." value))))
+
+(setf (gethash 'bar *h*) nil)
+
+(show-value 'foo *h*)
+(show-value 'bar *h*)
+(show-value 'baz *h*)
+
+(remhash 'bar *h*)
+
+(maphash #'(lambda (k v) (format t "~a => ~a~%" k v)) *h*)
+
+(maphash #'(lambda (k v) (when (< v 10) (remhash k *h*))) *h*)
