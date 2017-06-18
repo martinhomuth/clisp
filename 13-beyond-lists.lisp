@@ -39,3 +39,64 @@
 
 ;; retrieve key given a value
 ;; shadow mapping which can be removed to reveal the original mapping
+;; assoc - lookup
+(assoc 'a '((a . 1) (b . 2) (c . 3)))
+(assoc 'c '((a . 1) (b . 2) (c . 3)))
+(assoc 'd '((a . 1) (b . 2) (c . 3)))
+;; retrieve the value
+(cdr (assoc 'a '((a . 1) (b . 2) (c . 3))))
+
+(assoc "a" '(("a" . 1) ("b" . 2) ("c" . 3)) :test #'string=)
+(assoc "a" '(("a" . 1) ("b" . 2) ("c" . 3))) ; => NIL
+;; assoc iterates over the  list from front to back
+(assoc 'a '((a . 10) (b . 20) (a . 1) (c . 23))) ; => (A . 10)
+;; add pair to the front
+(cons (cons 'new-key 'new-value) alist)
+(acons 'new-key 'new-value alist)
+;; no modification to the list
+(setf alist (acons 'new-key 'new-value alist))
+;; or
+(push (cons 'new-key 'new-value) alist)
+;; reverse search for value
+(car (rassoc 1 '((a . 1) (b . 2) (c . 3))))
+
+(defparameter *alist-1* '((a . 1) (b . 2) (c . 3)))
+(defparameter *alist-copied* (copy-alist *alist-1*))
+(setf (cdr (assoc 'b *alist-1*)) 9)
+*alist-1*
+*alist-copied* ;; does not reference the same objects
+
+(pairlis '(a b c) '(1 2 3))
+
+;; plist
+(defparameter *plist* '(A 1 B 2 C 3))
+(getf *plist* 'b)
+
+(defparameter *plist* ())
+*plist*
+(setf (getf *plist* :a) 1)
+*plist*
+(setf (getf *plist* :a) 2)
+*plist*
+(setf (getf *plist* :b) 3)
+*plist*
+
+(remf *plist* :a)
+*plist*
+(remf *plist* :z)
+*plist*
+;; !!! GETF and REMF always use EQ !!!
+
+;; extract multiple properties
+(defun process-properties (plist keys)
+  (loop while plist do
+       (multiple-value-bind (key value tail) (get-properties plist keys)
+	 (when key (process-property key value))
+	 (setf plist (cddr tail)))))
+
+(get 'symbol 'key) === (getf (symbol-plist 'symbol) 'key)
+(setf (get 'some-symbol 'my-key) "information")
+(remprop 'symbol 'key) === (remf (symbol-plist 'symbol key))
+
+;; destructuring-bind
+
