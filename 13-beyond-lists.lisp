@@ -100,3 +100,8 @@
 
 ;; destructuring-bind
 
+(destructuring-bind (x y z) (list 1 2 3)
+  (list :x x :y y :z z))
+
+(destructuring-bind (x y z) (list 1 (list 2 20) 3)
+  (list :x x :y y :z z))
