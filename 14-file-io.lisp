@@ -1,15 +1,21 @@
 (let ((in (open "testfile")))
   (format t "~a~%" (read-line in))
-  (close in)
-  )
+  (close in))
 
-(let ((in (open "testfile" :if-does-not-exist nil)))
+(let ((in (open "not-existent" :if-does-not-exist nil)))
   (when in
     (format t "~a~%" (read-line in))
-    (close in)
-    )
-  )
+    (close in)))
 
+(let ((in (open "not-existent-will-create" :if-does-not-exist nil)))
+  (when in
+    (loop for line = (read-line in nil)
+       while line do (format t "~a~%" line))
+    (close in)))
+
+(let ((in (open "not-existent-error" :if-does-not-exist :error)))
+  (format t "~a~%" (read-line in))
+  (close in))
 
 ;;; Output
 
