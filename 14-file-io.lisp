@@ -84,4 +84,14 @@
 (make-pathname :name "peter"
 	       :defaults *pname*) ; copies from another file
 
+(delete-file "testfile")
 
+(let ((name "testfile"))
+  (with-open-file (out (ensure-directories-exist name)
+		       :direction :output
+		       :if-exists :append)
+    (write-line "this is a test line" out)
+    (format t "~a, ~a, ~a"
+	    (file-write-date out)
+	    (file-author out)
+	    (file-length out))))
