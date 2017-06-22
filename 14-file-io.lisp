@@ -54,3 +54,34 @@
     (terpri out)
     (pprint something out)
     (close out)))
+
+;;; automatic close of opened streams
+(with-open-file (stream "testfile" :direction :output :if-exists :append)
+  (when stream
+    (write-line "this is an appended line" stream)))
+
+;;; Filenames (or Lisps portable pathname objects
+(pathname "/etc/resolv.conf")
+
+(pathname-directory (pathname "/etc/resolv.conf"))
+(pathname-name (pathname "/etc/resolv.conf"))
+(pathname-type (pathname "/etc/resolv.conf"))
+(pathname-version (pathname "/etc/resolv.conf"))
+
+;; convert back
+(defparameter *pname* (pathname "/etc/resolv.conf"))
+(namestring *pname*)
+(directory-namestring *pname*)
+(file-namestring *pname*)
+
+;;; Pathname Construction
+(make-pathname
+ :directory '(:absolute "foo" "bar")
+ :type "txt"
+ :name "baz")
+
+;; better not to build from scratch
+(make-pathname :name "peter"
+	       :defaults *pname*) ; copies from another file
+
+
