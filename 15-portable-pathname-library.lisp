@@ -1,5 +1,6 @@
 ;;; Read Time Conditionalization
 
+;; there is a global variable containing the implementation features
 *FEATURES*
 
 ;; #+ someboolean => if someboolean is true, the next expression is
@@ -21,7 +22,7 @@
 
 (list-directory)
 
-(directory (make-pathname :name :wild :type :wild :defaults "/home/mhomuth"))
+(directory (make-pathname :name :wild :type :wild :defaults "/home/martin/"))
 
 ; Checks whether COMPONENT is neither NIL nor :UNSPECIFIC.
 (defun component-present-p (_component)
@@ -87,4 +88,44 @@
 
 (list-directory "/home/martin")
 
+;;; file-exists-p (that also checks for directories)
 
+;; sbcl, lispworks and openmcl already provide the exact feature
+
+;; allegro and cmucl return the name in the same form as given as parameter
+;; rather than returning a directory form
+
+;; clisp throws error if given a directory
+(defun file-exists-p (_pathname)
+  #+ (or sbcl lispworks openmcl)
+  (probe-file _pathname)
+
+  #+ (or allegro cmu)
+  (or (probe-file (pathname-as-directory _pathname))
+      (probe-file _pathname))
+
+  #+clisp
+  (or (ignore-errors
+	(probe-file (pathname-as-file _pathname)))
+      (ignore-errors
+	(let ((directory-form (pathname-as-directory _pathname)))
+	  (when (ext:probe-directory directory-form)
+	    directory-form))))
+  #- (or sbcl cmu lispworks openmcl allegro clisp)
+  (error "file-exists-p not implemented"))
+
+(file-exists-p "/home/martin/.zshrc")
+
+(defun pathname-as-file (_pathname)
+  (let ((pathname (pathname _pathname)))
+    (when (wild-pathname-p pathname)
+      (error "can't reliably convert wild pathnames."))
+    (if (directory-pathname-p _pathname)
+	(let* ((directory (pathname-directory pathname))
+	       (name-and-type (pathname (first (last directory)))))
+	  (make-pathname
+	   :directory (butlast directory)
+	   :name (pathname-name name-and-type)
+	   :type (pathname-type name-and-type)
+	   :defaults pathname))
+	pathname)))
